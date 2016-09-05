@@ -36,7 +36,7 @@ case "$1" in
     ;;
 
     *)
-    /bin/echo "$0 [start|stop]"
+    /bin/echo "$0 [backup|restore]"
     ret=1
 esac
 
