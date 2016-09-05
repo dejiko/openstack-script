@@ -1,0 +1,44 @@
+#!/bin/sh
+
+logfile="/var/log/iptables-namespace.log"
+iptables_file="/etc/iptables-namespace"
+iptables_backup_file="$iptables_file"
+
+# Wait for standup namespaces (because always delay about 1 min).
+while :
+do
+  namespace="$(/sbin/ip netns|/usr/bin/grep qrouter)"
+  if [ "$namespace" ];
+  then
+    break;
+  fi
+  sleep 2
+done
+
+namespace="$(/sbin/ip netns|/usr/bin/grep qrouter)"
+
+/bin/echo "running $0 at $(/bin/date)" >> $logfile
+/bin/echo "$PATH" >> $logfile
+/bin/echo "namespace: $namespace" >> $logfile
+/bin/echo "namespaces: $(/sbin/ip netns)" >> $logfile
+
+
+case "$1" in
+    restore)
+    /bin/cat $iptables_file >> $logfile
+    /sbin/ip netns exec $namespace /sbin/iptables-restore < $iptables_file >> $logfile 2>> $logfile
+    ret=$?
+    ;;
+
+    backup)
+    /sbin/ip netns exec $namespace /sbin/iptables-save > $iptables_backup_file >> $logfile 2>> $logfile
+    ret=$?
+    ;;
+
+    *)
+    /bin/echo "$0 [start|stop]"
+    ret=1
+esac
+
+exit $ret
+

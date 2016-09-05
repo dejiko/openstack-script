@@ -1,0 +1,15 @@
+[Unit]
+Description=Setup iptables on Linux namespace
+DefaultDependencies=false
+After=neutron-server.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/openstack-namespace-iptables restore
+ExecStop=/usr/local/bin/openstack-namespace-iptables backup
+TimeoutSec=60
+RemainAfterExit=yes
+
+[Install]
+RequiredBy=multi-user.target
+
